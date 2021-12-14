@@ -1,3 +1,4 @@
+import axios from 'axios'
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
@@ -8,6 +9,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [newBlog, setNewBlog] = useState({ title: '', author: '', url: ''})
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -20,6 +22,7 @@ const App = () => {
     if (loggedUser) {
       const user = JSON.parse(loggedUser)
       setUser(user)
+      blogService.setToken(user.token)
     }
   }, [])
 
@@ -32,6 +35,7 @@ const App = () => {
       const user = await loginService.login(credentials)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       setUser(user)
+      blogService.setToken(user.token)
       setUsername('')
       setPassword('')
     } catch (exception) {
@@ -44,6 +48,12 @@ const App = () => {
     setUser(null)
   }
   
+  const handleCreateBlog = async (e) => {
+    e.preventDefault()
+    const returnedBlog = await blogService.createBlog(newBlog)
+    setBlogs([...blogs, returnedBlog])
+  }
+
   if (user === null) {
     return (
       <div>
@@ -80,6 +90,35 @@ const App = () => {
       <button
         onClick={handleLogout}
       >logout</button></p>
+
+      <h2>create new</h2>
+      <form onSubmit={handleCreateBlog}>
+        <div>
+          title:
+          <input
+            type="text"
+            value={newBlog.title}
+            onChange={(e) => setNewBlog({...newBlog, title: e.target.value})}
+          />
+        </div>
+        <div>
+          author:
+          <input
+            type="text"
+            value={newBlog.author}
+            onChange={(e) => setNewBlog({...newBlog, author: e.target.value})}
+          />
+        </div>
+        <div>
+          url:
+          <input
+            type="text"
+            value={newBlog.url}
+            onChange={(e) => setNewBlog({...newBlog, url: e.target.value})}
+          />
+        </div>
+        <button type="submit">create</button>
+      </form>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
