@@ -1,6 +1,6 @@
-import axios from 'axios'
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -10,6 +10,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [newBlog, setNewBlog] = useState({ title: '', author: '', url: ''})
+  const [message, setMessage] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -34,30 +35,60 @@ const App = () => {
       }
       const user = await loginService.login(credentials)
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-      setUser(user)
       blogService.setToken(user.token)
+      setUser(user)
       setUsername('')
       setPassword('')
     } catch (exception) {
       console.error(exception)
+      const message = {
+        text: 'wrong username or password',
+        color: 'red'
+      }
+      setMessage(message)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
     }
   }
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
+    blogService.setToken(null)
     setUser(null)
   }
   
   const handleCreateBlog = async (e) => {
     e.preventDefault()
-    const returnedBlog = await blogService.createBlog(newBlog)
-    setBlogs([...blogs, returnedBlog])
+    try {
+      const returnedBlog = await blogService.createBlog(newBlog)
+      setBlogs([...blogs, returnedBlog])
+      const message = {
+        text: `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
+        color: 'green'
+      }
+      setMessage(message)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    } catch (error) {
+      console.log(error)
+      const message = {
+        text: error.message,
+        color: 'red'
+      }
+      setMessage(message)
+      setTimeout(() => {
+        setMessage(null)
+      }, 5000)
+    }
   }
 
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
+        {message && <Notification message={message}/>}
         <form onSubmit={handleLogin}>
           <div>
             username
@@ -86,6 +117,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      {message && <Notification message={message}/>}
       <p>{user.name} logged in
       <button
         onClick={handleLogout}
