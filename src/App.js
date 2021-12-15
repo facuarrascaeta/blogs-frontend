@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs(blogs.sort((a, b) => a.likes - b.likes))
+      setBlogs(blogs)
     )  
   }, [])
 
@@ -26,6 +26,7 @@ const App = () => {
     const loggedUser = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUser) {
       const user = JSON.parse(loggedUser)
+      console.log(user)
       setUser(user)
       blogService.setToken(user.token)
     }
@@ -65,6 +66,7 @@ const App = () => {
   const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject)
+      console.log(returnedBlog)
       setBlogs([...blogs, returnedBlog])
       blogFormRef.current.toggleVisibility()
       const message = {
@@ -88,6 +90,12 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (id) => {
+    const newBlogs = blogs.filter(blog => blog.id !== id)
+    setBlogs(newBlogs)
+    await blogService.deleteBlog(id)
+  }
+
   if (user === null) {
     return (
       <div>
@@ -104,6 +112,8 @@ const App = () => {
     )
   }
 
+  const blogsOrderedByLikes = blogs.sort((a, b) => a.likes - b.likes)
+
   return (
     <div>
       <h2>blogs</h2>
@@ -116,8 +126,8 @@ const App = () => {
       <Togglable label="create new blog" ref={blogFormRef}>
         <BlogForm createBlog={addBlog}/>
       </Togglable>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+      {blogsOrderedByLikes.map(blog =>
+        <Blog key={blog.id} blog={blog} handleDelete={deleteBlog} currentUser={user.username}/>
       )}
     </div>
   )
