@@ -18,7 +18,7 @@ const App = () => {
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
+      setBlogs(blogs.sort((a, b) => a.likes - b.likes))
     )  
   }, [])
 
@@ -64,7 +64,7 @@ const App = () => {
   
   const addBlog = async (blogObject) => {
     try {
-      const returnedBlog = await blogService.createBlog(blogObject)
+      const returnedBlog = await blogService.create(blogObject)
       setBlogs([...blogs, returnedBlog])
       blogFormRef.current.toggleVisibility()
       const message = {
