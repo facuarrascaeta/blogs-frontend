@@ -19,7 +19,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs(blogs)
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -62,12 +62,10 @@ const App = () => {
     blogService.setToken(null)
     setUser(null)
   }
-  
+
   const addBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.create(blogObject)
-      console.log(returnedBlog)
-      setBlogs([...blogs, returnedBlog])
       blogFormRef.current.toggleVisibility()
       const message = {
         text: `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
@@ -119,9 +117,9 @@ const App = () => {
       <h2>blogs</h2>
       {message && <Notification message={message}/>}
       <p>{user.name} logged in
-      <button
-        onClick={handleLogout}
-      >logout</button></p>
+        <button
+          onClick={handleLogout}
+        >logout</button></p>
 
       <Togglable label="create new blog" ref={blogFormRef}>
         <BlogForm createBlog={addBlog}/>
