@@ -1,6 +1,6 @@
 import React from 'react'
 import '@testing-library/jest-dom/extend-expect'
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import Blog from './Blog'
 
 
@@ -32,5 +32,12 @@ describe('<Blog />', () => {
   test('<Blog /> renders with hidden likes and url', () => {
     const div = component.container.querySelector('.blogDetails')
     expect(div).toHaveStyle('display: none')
+  })
+
+  test('url and likes are rendered when view button is clicked', () => {
+    const div = component.container.querySelector('.blogDetails')
+    const viewButton = component.getByText('view')
+    fireEvent.click(viewButton)
+    expect(div).not.toHaveStyle('display: none')
   })
 })
